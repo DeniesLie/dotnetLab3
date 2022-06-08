@@ -1,7 +1,7 @@
 
 namespace FileSystem.Core.Models;
 
-public class Directory : FsNode
+public class Directory : FsContainer
 {
     public Directory(string name) : base(name)
     {
@@ -11,7 +11,7 @@ public class Directory : FsNode
     {
         var newFile = new Directory(this.Name)
         {
-            _childNodes = this._childNodes.Select(n => n.CopyByValue()).ToList(),
+            ChildrenNodes = ChildrenNodes.Select(n => n.CopyByValue()).ToList(),
         };
         return newFile;
     }

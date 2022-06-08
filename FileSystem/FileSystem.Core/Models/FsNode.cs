@@ -1,43 +1,41 @@
+using FileSystem.Core.Enums;
+using FileSystem.Core.Helpers;
+
 namespace FileSystem.Core.Models;
 
 public abstract class FsNode
 {
-    protected ICollection<FsNode> _childNodes;
-    
     public FsNode(string name)
     {
-        _childNodes = new LinkedList<FsNode>();
-        Id = new Guid();
         Name = name;
     }
-
-    public Guid Id { get; }
+    
     public string Name { get; set; }
+    public FsNodeType Type { get; protected set; }
     public virtual FsNode? ParentNode { get; set; }
 
-    public string Path
+    public virtual string Path
     {
-        get => ParentNode.Path + '/' + Name;
+        get => (ParentNode?.Path ?? string.Empty) + '/' + Name;
     }
+    public abstract FsNode? CopyByValue();
 
-    public IEnumerable<FsNode> FsNodes
-    {
-        get => _childNodes.Select(node => node);
-    }
+    // public virtual IEnumerable<FsNode>? ChildNodes
+    // {
+    //     get => _childNodes.Select(node => node);
+    // }
 
-    public abstract FsNode CopyByValue();
-    
-    public bool AddChild(FsNode fsNode)
-    {
-        if (fsNode == null) throw new ArgumentNullException(nameof(fsNode));
-        if (_childNodes.Contains(fsNode)) return false;
-        
-        _childNodes.Add(fsNode);
-        fsNode.ParentNode = this;
-        return true;
-    }
+    // public virtual bool AddChild(FsNode fsNode)
+    // {
+    //     if (fsNode == null) throw new ArgumentNullException(nameof(fsNode));
+    //     if (_childNodes.Contains(fsNode)) return false;
+    //     
+    //     _childNodes.Add(fsNode);
+    //     fsNode.ParentNode = this;
+    //     return true;
+    // }
 
-    public FsNode? FindChild(Helpers.Path path)
+    /*public virtual FsNode? FindChild(FsPath path)
     {
         var current = path.Current;
         if (path.MoveNext() == false)
@@ -53,7 +51,7 @@ public abstract class FsNode
             return child.FindChild(path);
         
         return null;   
-    }
+    }*/
 
     
 }

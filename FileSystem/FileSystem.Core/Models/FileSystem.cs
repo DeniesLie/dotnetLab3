@@ -1,15 +1,21 @@
+using FileSystem.Core.Enums;
+using FileSystem.Core.Helpers;
+
 namespace FileSystem.Core.Models;
 
 public sealed class FileSystem
 {
     private static FileSystem? _instance;
-    private ICollection<Disk> _disks = new List<Disk>();
-
-    private FileSystem(IEnumerable<char> disksNames)
+    private ICollection<FsNode> _disks = new List<FsNode>();
+    private FsContainer _root;
+    
+    private FileSystem(IEnumerable<char> drivesNames)
     {
-        foreach (var disksName in disksNames)
-        {   
-            AddDisk(disksName);
+        _root = new Root("root");
+        
+        foreach (var driveName in drivesNames)
+        {
+            _root.AddChild(new Drive(driveName.ToString()));
         }
     }
     
@@ -21,47 +27,46 @@ public sealed class FileSystem
         }
         return _instance;
     }
-
-    public void AddDisk(char diskName)
-        => _disks.Add(new Disk(diskName.ToString()));
-
-    public bool AddDirectory(Helpers.Path path, string dirName)
-        => AddFsNode(path, new Directory(dirName));
-
-    public bool AddFile(Helpers.Path path, string fileName, string content)
-        => AddFsNode(path, new File(fileName, content));
-
-    public bool CopyByValue(Helpers.Path targetPath, Helpers.Path destinationPath)
+    
+    public bool AddFsNode(FsPath fsPath, FsNode fsNode)
     {
-        var targetNode = FindNode(targetPath);
-        var destinationNode = FindNode(destinationPath);
-        if (targetNode != null && destinationNode != null)
+        var nodeCopyTo = _root.FindChild(fsPath);
+        if (nodeCopyTo != null)
+        {
+            if (nodeCopyTo is FsContainer containerNode)
+            {
+                return containerNode.AddChild(fsNode);
+            }
+        }
+
+        return false;
+    }
+
+    public bool CopyByValue(FsPath targetPath, FsPath destinationPath)
+    {
+        var targetNode = _root.FindChild(targetPath);
+        var destinationNode = _root.FindChild(destinationPath);
+        if (targetNode != null 
+            && destinationNode != null 
+            && destinationNode is FsContainer destinationContainer)
         {
             var nodeCopy = targetNode.CopyByValue();
-            destinationNode.AddChild(nodeCopy);
+            destinationContainer.AddChild(nodeCopy);
             nodeCopy.ParentNode = destinationNode;
             return true;
         }
 
         return false;
     }
-    
-    private bool AddFsNode(Helpers.Path path, FsNode fsNode)
-    {
-        var parentNode = FindNode(path);
-        if (parentNode != null)
-            return parentNode.AddChild(fsNode);
-        
-        return false;
-    }
 
-    private FsNode? FindNode(Helpers.Path path)
+    public IEnumerable<FsNode> ListNodesInDirectory(FsPath path)
     {
-        var disk = _disks.SingleOrDefault(d => d.Name == path.DiskName.ToString());
-        if (disk != null)
+        IEnumerable<FsNode> result = new List<FsNode>();
+        var fsNode = _root.FindChild(path);
+        if (fsNode is FsContainer containerNode)
         {
-            return disk.FindChild(path);
+            result = containerNode.GetChildren();
         }
-        return null;
+        return result;
     }
 }
