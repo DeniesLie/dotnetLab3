@@ -30,9 +30,9 @@ public class FileSystemController
         return _fileSystem.AddFsNode(FsPath.Build(path),new File(fileName, content));
     }
 
-    public IEnumerable<string> ListFilesInDirectory(string path)
+    public IEnumerable<string> ListItemsInDirectory(string path)
     {
-        return _fileSystem.ListNodesInDirectory(FsPath.Build(path))
+        return _fileSystem.GetNodesInDirectory(FsPath.Build(path))
             .Select(node => node.Name);
     }
 

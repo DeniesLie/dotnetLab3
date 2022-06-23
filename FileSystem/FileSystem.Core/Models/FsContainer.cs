@@ -10,7 +10,7 @@ public abstract class FsContainer : FsNode
     {
     }
 
-    public virtual FsNode? FindChild(FsPath fsPath)
+    public FsNode? FindChild(FsPath fsPath)
     {
         var isLast = !fsPath.MoveNext();
         var childName = fsPath.Current;
@@ -20,16 +20,13 @@ public abstract class FsContainer : FsNode
         
         var child = ChildrenNodes.SingleOrDefault(c => c.Name == childName);
         
-        if (child == null)
-            return null;
-
         if (child is FsContainer childContainer)
             return childContainer.FindChild(fsPath);
         
         return child;
     }
 
-    public virtual bool AddChild(FsNode childNode)
+    public bool AddChild(FsNode childNode)
     {
         if (!ChildrenNodes.Select(c => c.Name).Contains(childNode.Name))
         {

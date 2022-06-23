@@ -26,18 +26,6 @@ public class FsPath : IEnumerator<string>
         }
     }
 
-    public char DriveName
-    {
-        get => char.Parse(_pathCollection[0]);
-        set => _pathCollection[0] = value.ToString();
-    }
-
-    public FsPath Add(string nodeName)
-    {
-        _pathCollection.Add(nodeName);
-        return this;
-    }
-
     public bool MoveNext()
     {
         if (_pathCount == _pathCollection.Count - 1)
